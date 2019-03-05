@@ -9,7 +9,7 @@ export default class Core {
         this.entities = entities
     }
 
-    initTables() {
+    initTables(pool) {
         throw "You must implement method initTables !"
     }
 
@@ -17,11 +17,25 @@ export default class Core {
         throw "You must implement method getType !"
     }
 
-    async save(data) { }
-    async count() { }
-    async findByPk(id, { attributes }) { }
-    async findAll({ attributes }) { }
-    async findOne({ where, attributes }) { }
-    async update(data) { }
-    async remove(data) { }
+    async save(data) {
+        throw "You must implement method save !"
+    }
+    async count() {
+        throw "You must implement method count !"
+    }
+    async findByPk(id, { attributes }) {
+        throw "You must implement method findByPk !"
+    }
+    async findAll({ attributes }) {
+        throw "You must implement method findAll !"
+    }
+    async findOne({ where, attributes }) {
+        throw "You must implement method findOne !"
+    }
+    async update(data) {
+        throw "You must implement method update !"
+    }
+    async remove(data) {
+        throw "You must implement method remove !"
+    }
 }

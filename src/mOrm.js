@@ -43,4 +43,11 @@ export default class mOrm {
             throw ('No config was pass in parameter and there is no mOrm.config.js file !')
         }
     }
+
+    getEntity(entityName) {
+        for (const entity in this.entities)
+            if (entity.toLowerCase() == entityName.toLowerCase())
+                return new this.entities[entity](this.dbInstance)
+        return undefined;
+    }
 }

@@ -1,5 +1,5 @@
-import Type from "../engine/type";
-import Entity from "./entity";
+import Type from "../engine/type"
+import Entity from "./entity"
 
 export default class Student extends Entity {
     constructor(dbInstance) {

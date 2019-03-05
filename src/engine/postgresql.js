@@ -1,6 +1,6 @@
 import Core from "./core"
 import { Pool } from 'pg'
-import Type from "./type";
+import Type from "./type"
 
 export default class PostgreSQL extends Core {
 
@@ -20,26 +20,26 @@ export default class PostgreSQL extends Core {
             idleTimeoutMillis: 30000
         }
 
-        const pool = new Pool(config)
-        pool.on('error', (err, client) => {
+        this.pool = new Pool(config)
+        this.pool.on('error', (err, client) => {
             console.error('Idle client error', err.message, err.stack)
         })
 
-        this.initTables(pool)
+        await this.initTables()
 
-        return pool
+        return this.pool
     }
 
-    initTables(pool) {
+    async initTables() {
         if (this.synchronize) {
-            this.entities.forEach(async e => {
-                let table = e.meta()
-                await pool.query(`DROP TABLE IF EXISTS ${table.name}`)
+            for (const entity of this.entities) {
+                let table = entity.meta()
+                await this.pool.query(`DROP TABLE IF EXISTS ${table.name}`)
 
                 let fields = []
                 for (const key in table.columns) {
                     if (table.columns.hasOwnProperty(key)) {
-                        const field = table.columns[key];
+                        const field = table.columns[key]
                         let type = this.getType(field.type)
 
                         if (!type) continue
@@ -52,8 +52,8 @@ export default class PostgreSQL extends Core {
                         fields.push(`${key} ${type}${primaryKey}`)
                     }
                 }
-                await pool.query(`CREATE TABLE IF NOT EXISTS ${table.name} ( ${fields.join(',')} )`)
-            })
+                await this.pool.query(`CREATE TABLE IF NOT EXISTS ${table.name} ( ${fields.join(',')} )`)
+            }
         }
     }
 
@@ -63,10 +63,6 @@ export default class PostgreSQL extends Core {
         if (source == Type.DATE) return "DATE"
         if (source == Type.TIME) return "TIME"
         if (source == Type.STRING) return "TEXT"
-        return undefined;
-    }
-
-    remove(data) {
-        // Requete sql
+        return undefined
     }
 }
