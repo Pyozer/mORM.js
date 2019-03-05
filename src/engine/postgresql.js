@@ -74,10 +74,7 @@ export default class PostgreSQL extends Core {
         return this.pool.query(`SELECT COUNT(*) FROM ${entity.name.toLowerCase()}`)
     }
     async findByPk(entity, id, { attributes = [] }) {
-        return this.pool.query(
-            `SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()} WHERE ${entity.getPK()} = $1`,
-            [id]
-        )
+        return this.findOne(entity, { [entity.getPK()]: id }, attributes)
     }
     async findAll(entity, { attributes = [] }) {
         return this.pool.query(`SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()}`)
@@ -86,19 +83,25 @@ export default class PostgreSQL extends Core {
         let conditions = Object.keys(where).map((key, i) => `${key} = $${i + 1}`).join(' && ')
         let values = Object.values(where)
 
-        console.log(`SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()} WHERE ${conditions}`);
-        console.log(values);
-        
-
         return this.pool.query(
             `SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()} WHERE ${conditions}`,
             values
         )
     }
     async update(entity, data) {
-        //this.dbInstance.update(this.name, data)
+        let fields = Object.keys(data).map((k, i) => `${k} = $${i + 1}`).join(', ')
+        let values = Object.values(data)
+        values.push(data[entity.getPK()])
+
+        return this.pool.query(
+            `UPDATE ${entity.name.toLowerCase()} SET ${fields} WHERE ${entity.getPK()} = $${values.length} RETURNING *`,
+            values
+        )
     }
     async remove(entity, data) {
-        //this.dbInstance.remove(this.name, data)
+        return this.pool.query(
+            `DELETE FROM ${entity.name.toLowerCase()} WHERE ${entity.getPK()} = $1 RETURNING *`,
+            [data[entity.getPK()]]
+        )
     }
 }

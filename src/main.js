@@ -49,7 +49,20 @@ async function init() {
         where: { firstname: "Chipeur" },
         attributes: ["lastname"]
     });
-    console.log(`Find one: ${findOneResult.lastname}`);
+    console.log(`Find one: ${findOneResult.lastname}`)
+
+    // Update student
+    findByPkResult.lastname = "LastnameEdited"
+    const studentUpdated = await studentEntity.update(findByPkResult)
+    console.log(`Edited value: ${studentUpdated.lastname}`)
+
+    // Search Student by primary key
+    const findUpdatedStudent = await studentEntity.findByPk(1, {});
+    console.log(`Find By Pk: ${findUpdatedStudent.lastname}`);
+
+    // Delete student
+    const studentRemoved = await studentEntity.remove(findUpdatedStudent)
+    console.log(`Removed value: ${studentRemoved.id}`)
 }
 
 init()

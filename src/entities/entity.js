@@ -24,13 +24,13 @@ export default class Entity {
     async findAll({ attributes = [] }) {
         return (await this.dbInstance.findAll(this, attributes)).rows
     }
-    async findOne({ where = {}, attributes = [] }) {
+    async findOne({ where = {}, attributes = [] }) {  
         return (await this.dbInstance.findOne(this, where, attributes)).rows[0]
     }
     async update(data) {
-        //this.dbInstance.update(this.name, data)
+        return (await this.dbInstance.update(this, data)).rows[0]
     }
     async remove(data) {
-        //this.dbInstance.remove(this.name, data)
+        return (await this.dbInstance.remove(this, data)).rows[0]
     }
 }
