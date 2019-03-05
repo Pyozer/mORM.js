@@ -18,10 +18,11 @@ export default class mOrm {
         })
 
         if (this.config.type == "postgresql") {
-            this.dbInstance = await new PostgreSQL(this.config).initialize()
+            this.dbInstance = await new PostgreSQL(this.config)
         } else {
             throw (`${this.config.type} is not supported !`)
         }
+        await this.dbInstance.initialize()
     }
 
     async validateConfig(dbConfig) {
@@ -30,8 +31,8 @@ export default class mOrm {
             return dbConfig
         if (dbConfig.uri) {
             const regex = /^(.*):\/\/(.*):(.*)@(.*):(\d+)\/(.*)$/
-            const [, type, username, password, host, post, database] = regex.exec(dbConfig.uri)
-            return { type, username, password, host, post, database }
+            const [, type, username, password, host, port, database] = regex.exec(dbConfig.uri)
+            return { type, username, password, host, port, database }
         }
 
         let { readFile } = require('fs').promises
@@ -48,6 +49,6 @@ export default class mOrm {
         for (const entity in this.entities)
             if (entity.toLowerCase() == entityName.toLowerCase())
                 return new this.entities[entity](this.dbInstance)
-        return undefined;
+        throw (`${entityName} is not a valid model !`)
     }
 }

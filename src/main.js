@@ -18,11 +18,12 @@ async function init() {
     }
 
     console.log(student);
-    
 
     const studentEntity = orm.getEntity('Student')
-    console.log(studentEntity);
+    const countresult = await studentEntity.count();
+    console.log(`Row count: ${countResult.rows[0].count}`);
     
+
     const saved = await studentEntity.save(student)
     console.log(`New student ${saved.firstname}`)
 }
