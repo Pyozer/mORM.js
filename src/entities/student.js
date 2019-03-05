@@ -6,6 +6,10 @@ export default class Student extends Entity {
         super(dbInstance, 'Student')
     }
 
+    getPK() {
+        return 'id'
+    }
+
     static meta() {
         return {
             name: "Student",

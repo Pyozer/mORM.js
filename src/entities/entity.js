@@ -4,20 +4,28 @@ export default class Entity {
         this.name = name
     }
 
+    static meta() {
+        throw "You must implement static meta in your entity !"
+    }
+
+    getPK() {
+        throw "You must implement getPK in your entity !"
+    }
+
     async save(data) {
-        //this.dbInstance.save(this.name, data)
+        return (await this.dbInstance.save(this, data)).rows[0]
     }
     async count() {
-        return this.dbInstance.count(this.name)
+        return (await this.dbInstance.count(this)).rows[0].count
     }
-    async findByPk(id, { attributes }) {
-        //this.dbInstance.findByPk(this.name, id, attributes)
+    async findByPk(id, { attributes = [] }) {
+        return (await this.dbInstance.findByPk(this, id, attributes)).rows[0]
     }
-    async findAll({ attributes }) {
-        //this.dbInstance.findAll(this.name, attributes)
+    async findAll({ attributes = [] }) {
+        return (await this.dbInstance.findAll(this, attributes)).rows
     }
-    async findOne({ where, attributes }) {
-        //this.dbInstance.findOne(this.name, where, attributes)
+    async findOne({ where = {}, attributes = [] }) {
+        return (await this.dbInstance.findOne(this, where, attributes)).rows[0]
     }
     async update(data) {
         //this.dbInstance.update(this.name, data)

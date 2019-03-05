@@ -12,20 +12,44 @@ async function init() {
         ],
     })
 
-    let student = {
-        firstname: 'Dora',
-        lastname: 'Lexploratrice'
-    }
-
-    console.log(student);
-
     const studentEntity = orm.getEntity('Student')
-    const countresult = await studentEntity.count();
-    console.log(`Row count: ${countResult.rows[0].count}`);
-    
 
-    const saved = await studentEntity.save(student)
-    console.log(`New student ${saved.firstname}`)
+    // Count number of rows
+    const countResult = await studentEntity.count();
+    console.log(`Row count: ${countResult}`);
+
+    // Insert a new Student
+    const student1Saved = await studentEntity.save({
+        firstname: 'Dora',
+        lastname: 'L\'exploratrice'
+    })
+    console.log(`Inserted value: ${student1Saved.firstname}`)
+
+    // Count number of rows
+    const countResult2 = await studentEntity.count();
+    console.log(`Row count: ${countResult2}`);
+
+    // Insert a new Student
+    const student2Saved = await studentEntity.save({
+        firstname: 'Chipeur',
+        lastname: 'Arrête de chiper !'
+    })
+    console.log(`Inserted value: ${student2Saved.firstname}`)
+
+    // Search Student by primary key
+    const findByPkResult = await studentEntity.findByPk(1, {});
+    console.log(`Find By Pk: ${findByPkResult.firstname}`);
+
+    // Get all Student
+    const findAllResult = await studentEntity.findAll({});
+    console.log(`Find All: ${findAllResult.map(e => e.firstname).join(', ')}`);
+
+    // Get Student with firstname = Chipeur
+    const findOneResult = await studentEntity.findOne({
+        where: { firstname: "Chipeur" },
+        attributes: ["lastname"]
+    });
+    console.log(`Find one: ${findOneResult.lastname}`);
 }
 
 init()

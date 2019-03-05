@@ -16,26 +16,30 @@ export default class Core {
     getType(source) {
         throw "You must implement method getType !"
     }
+    
+    getFields(attributes = []) {
+        return (attributes.length == 0) ? '*' : attributes.join(', ')
+    }
 
-    async save(tableName, data) {
+    async save(entity, data) {
         throw "You must implement method save !"
     }
-    async count(tableName) {
+    async count(entity) {
         throw "You must implement method count !"
     }
-    async findByPk(tableName, id, { attributes }) {
+    async findByPk(entity, id, { attributes }) {
         throw "You must implement method findByPk !"
     }
-    async findAll(tableName, { attributes }) {
+    async findAll(entity, { attributes }) {
         throw "You must implement method findAll !"
     }
-    async findOne(tableName, { where, attributes }) {
+    async findOne(entity, where, attributes) {
         throw "You must implement method findOne !"
     }
-    async update(tableName, data) {
+    async update(entity, data) {
         throw "You must implement method update !"
     }
-    async remove(tableName, data) {
+    async remove(entity, data) {
         throw "You must implement method remove !"
     }
 }

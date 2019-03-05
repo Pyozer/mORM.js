@@ -60,25 +60,45 @@ export default class PostgreSQL extends Core {
         return undefined
     }
 
-    async save(tableName, data) {
-        //this.dbInstance.save(this.name, data)
+    async save(entity, data) {
+        let fields = Object.keys(data).join(', ')
+        let values = Object.values(data)
+        let params = values.map((_, i) => `$${i + 1}`).join(', ')
+
+        return this.pool.query(
+            `INSERT INTO ${entity.name.toLowerCase()} (${fields}) VALUES(${params}) RETURNING *`,
+            values
+        )
     }
-    async count(tableName) {
-        return this.pool.query(`SELECT COUNT(*) FROM ${tableName.toLowerCase()}`)
+    async count(entity) {
+        return this.pool.query(`SELECT COUNT(*) FROM ${entity.name.toLowerCase()}`)
     }
-    async findByPk(tableName, id, { attributes }) {
-        //this.dbInstance.findByPk(this.name, id, attributes)
+    async findByPk(entity, id, { attributes = [] }) {
+        return this.pool.query(
+            `SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()} WHERE ${entity.getPK()} = $1`,
+            [id]
+        )
     }
-    async findAll(tableName, { attributes }) {
-        //this.dbInstance.findAll(this.name, attributes)
+    async findAll(entity, { attributes = [] }) {
+        return this.pool.query(`SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()}`)
     }
-    async findOne(tableName, { where, attributes }) {
-        //this.dbInstance.findOne(this.name, where, attributes)
+    async findOne(entity, where = {}, attributes = []) {
+        let conditions = Object.keys(where).map((key, i) => `${key} = $${i + 1}`).join(' && ')
+        let values = Object.values(where)
+
+        console.log(`SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()} WHERE ${conditions}`);
+        console.log(values);
+        
+
+        return this.pool.query(
+            `SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()} WHERE ${conditions}`,
+            values
+        )
     }
-    async update(tableName, data) {
+    async update(entity, data) {
         //this.dbInstance.update(this.name, data)
     }
-    async remove(tableName, data) {
+    async remove(entity, data) {
         //this.dbInstance.remove(this.name, data)
     }
 }
