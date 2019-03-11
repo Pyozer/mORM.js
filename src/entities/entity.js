@@ -12,6 +12,13 @@ export default class Entity {
         throw "You must implement getPK in your entity !"
     }
 
+    static findPk({ columns = {} }) {
+        for (const key of Object.keys(columns))
+            if (columns[key].primary)
+                return key
+        throw "Model doesn't have PrimaryKey !"
+    }
+
     async save(data) {
         return this.dbInstance.save(this, data)
     }
@@ -32,5 +39,13 @@ export default class Entity {
     }
     async remove(data) {
         return this.dbInstance.remove(this, data)
+    }
+
+    async hasOne(entity, options) {
+        return this.dbInstance.hasOne(this, entity, options)
+    }
+
+    async manyToMany(entity, options) {
+        return this.dbInstance.manyToMany(this, entity, options)
     }
 }

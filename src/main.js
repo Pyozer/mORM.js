@@ -1,5 +1,7 @@
 import mOrm from "./mOrm"
 import Student from "./entities/student"
+import Project from "./entities/project";
+import Note from "./entities/note";
 
 async function init() {
     let orm = new mOrm()
@@ -9,13 +11,19 @@ async function init() {
         synchronize: true,
     }, {
         entities: [
-            Student
+            Student,
+            Project,
+            Note
         ],
     })
+
 
     orm.dbInstance.dump()
 
     const studentEntity = orm.getEntity('Student')
+    studentEntity.manyToMany(Project, {
+        tableName: "student_projects"
+    })
 
     // Count number of rows
     const countResult = await studentEntity.count();
@@ -35,7 +43,8 @@ async function init() {
     // Insert a new Student
     const student2Saved = await studentEntity.save({
         firstname: 'Chipeur',
-        lastname: 'Arrête de chiper !'
+        lastname: 'Arrête de chiper !',
+        age: 12
     })
     console.log(`Inserted value: ${student2Saved.firstname}`)
 

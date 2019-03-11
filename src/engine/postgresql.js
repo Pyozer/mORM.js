@@ -2,11 +2,12 @@ import Core from "./core"
 import { Pool } from 'pg'
 import Type from "./type"
 import OrmLog from "../libs/mLogs";
+import Entity from "../entities/entity";
 
 export default class PostgreSQL extends Core {
 
     async initialize() {
-        const { host, port, user, password, database } = this
+        const { host, port, user, password, database, synchronize } = this
         let config = {
             user,
             database,
@@ -22,16 +23,17 @@ export default class PostgreSQL extends Core {
             OrmLog.print('Idle client error', err.message, err.stack)
         })
 
+        if (synchronize)
+            await this.dropTables()
+
         await this.initTables()
     }
 
     async initTables() {
-        try {            
+        try {
             const entities = Object.values(this.entities);
-            for (const entity of entities) {                
+            for (const entity of entities) {
                 const { name, columns } = entity.meta()
-                if (this.synchronize)
-                    await this.query(`DROP TABLE IF EXISTS ${name.toLowerCase()}`)
 
                 let fields = []
                 for (const key in columns) {
@@ -45,12 +47,17 @@ export default class PostgreSQL extends Core {
 
                     fields.push(`${key} ${type}${primaryKey} ${optional}`)
                 }
+
                 await this.query(`CREATE TABLE IF NOT EXISTS ${name.toLowerCase()} ( ${fields.join(',')} )`)
                 OrmLog.print(`Table ${name} has been created`);
             }
-        } catch (e) {            
+        } catch (e) {
             throw new Error(e.message);
         }
+    }
+
+    async dropTables() {
+        await this.query(`DROP TABLE IF EXISTS ${Object.keys(this.entities).join(',')} CASCADE`)
     }
 
     getType(source) {
@@ -99,11 +106,11 @@ export default class PostgreSQL extends Core {
     }
 
     async findOne(entity, where = {}, attributes = []) {
-        let conditions = Object.keys(where).map((key, i) => `${key} = $${i + 1}`).join(' && ')
+        let conditions = Object.keys(where).map((key, i) => `${key} = $${i + 1}`).join(' AND ')
         let values = Object.values(where)
 
         const res = await this.query(
-            `SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()} WHERE ${conditions}`,
+            `SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()} WHERE ${conditions} LIMIT 1`,
             values
         )
         return res.rows[0]
@@ -127,5 +134,33 @@ export default class PostgreSQL extends Core {
             [data[entity.getPK()]]
         )
         return res.rows[0]
+    }
+
+    async hasOne(entity, foreignEntity, { fieldName }) {
+        if (!fieldName) throw 'You must provide the column name to create the foreignKey !'
+
+        const foreignEntityPK = Entity.findPk(foreignEntity.meta())
+
+        await this.query(`ALTER TABLE ${entity.name} ADD COLUMN ${fieldName} ${this.getType(Type.INTEGER)}`)
+        await this.query(`ALTER TABLE ${entity.name} ADD FOREIGN KEY (${fieldName}) REFERENCES ${foreignEntity.name}(${foreignEntityPK})`)
+
+        OrmLog.print(`Table ${entity.name} has been altered to add ForeignKey`);
+    }
+
+    async manyToMany(entity, foreignEntity, { tableName }) {
+        if (!tableName) throw 'You must provide the join table name to create the foreignKeys !'
+
+        const foreignEntityPK = foreignEntity.name.toLowerCase() + Entity.findPk(foreignEntity.meta())
+        const entityPK = entity.name.toLowerCase() + entity.getPK()
+
+        const columns = [foreignEntityPK, entityPK].map(c => `${c} ${this.getType(Type.INTEGER)} NOT NULL`).join(',')
+        
+        await this.query(`DROP TABLE IF EXISTS ${tableName}`)
+        await this.query(`CREATE TABLE IF NOT EXISTS ${tableName} (${columns})`)
+
+        await this.query(`ALTER TABLE ${tableName} ADD FOREIGN KEY (${foreignEntityPK}) REFERENCES ${foreignEntity.name}(${foreignEntityPK})`)
+        await this.query(`ALTER TABLE ${tableName} ADD FOREIGN KEY (${entityPK}) REFERENCES ${entity.name}(${entityPK})`)
+
+        OrmLog.print(`Table ${tableName} has been created !`);
     }
 }

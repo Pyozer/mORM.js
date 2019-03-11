@@ -12,7 +12,11 @@ export default class Core {
         this.entities = entities
     }
 
-    initTables() {
+    async dropTables() {
+        throw "You must implement method dropTables !"
+    }
+
+    async initTables() {
         throw "You must implement method initTables !"
     }
 
@@ -48,6 +52,10 @@ export default class Core {
     }
     async remove(entity, data) {
         throw "You must implement method remove !"
+    }
+    
+    async hasOne(entity, foreignEntity, { fieldName }) {
+        throw "You must implement method hasOne !"
     }
 
     dump() {

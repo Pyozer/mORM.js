@@ -1,34 +1,31 @@
 import Type from "../engine/type"
 import Entity from "./entity"
+import Student from "./student";
 
-export default class Student extends Entity {
+export default class Project extends Entity {
     constructor(dbInstance) {
-        super(dbInstance, 'Student')
+        super(dbInstance, 'Project')
     }
 
     getPK() {
-        return Entity.findPk(Student.meta())
+        return Entity.findPk(Project.meta())
     }
 
     static meta() {
         return {
-            name: "Student",
+            name: "Project",
             columns: {
                 id: {
                     primary: true,
                     type: Type.INTEGER,
                     generated: true
                 },
-                firstname: {
+                name: {
                     type: Type.STRING
                 },
-                lastname: {
+                description: {
                     type: Type.STRING
                 },
-                age: {
-                    type: Type.INTEGER,
-                    optional: true
-                }
             }
         }
     }
