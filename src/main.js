@@ -21,9 +21,9 @@ async function init() {
     orm.dbInstance.dump()
 
     const studentEntity = orm.getEntity('Student')
-    studentEntity.manyToMany(Project, {
-        tableName: "student_projects"
-    })
+    const projectEntity = orm.getEntity('Project')
+    await projectEntity.hasOne(Student)
+    await projectEntity.manyToMany(Note)
 
     // Count number of rows
     const countResult = await studentEntity.count();

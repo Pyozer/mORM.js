@@ -136,31 +136,36 @@ export default class PostgreSQL extends Core {
         return res.rows[0]
     }
 
-    async hasOne(entity, foreignEntity, { fieldName }) {
-        if (!fieldName) throw 'You must provide the column name to create the foreignKey !'
+    async hasOne(entity, foreignEntity) {
+        const foreignPK = Entity.findPk(foreignEntity.meta())
+        const foreignField = foreignEntity.name.toLowerCase() + foreignPK
 
-        const foreignEntityPK = Entity.findPk(foreignEntity.meta())
-
-        await this.query(`ALTER TABLE ${entity.name} ADD COLUMN ${fieldName} ${this.getType(Type.INTEGER)}`)
-        await this.query(`ALTER TABLE ${entity.name} ADD FOREIGN KEY (${fieldName}) REFERENCES ${foreignEntity.name}(${foreignEntityPK})`)
+        await this.query(`
+            ALTER TABLE ${entity.name} ADD COLUMN ${foreignField} INT REFERENCES ${foreignEntity.name}(${foreignPK})
+        `)
 
         OrmLog.print(`Table ${entity.name} has been altered to add ForeignKey`);
     }
 
-    async manyToMany(entity, foreignEntity, { tableName }) {
-        if (!tableName) throw 'You must provide the join table name to create the foreignKeys !'
+    async manyToMany(entity, foreignEntity) {
+        const tableName = `${entity.name}_${foreignEntity.name}`
 
-        const foreignEntityPK = foreignEntity.name.toLowerCase() + Entity.findPk(foreignEntity.meta())
-        const entityPK = entity.name.toLowerCase() + entity.getPK()
+        const entityPK = entity.getPK()
+        const foreignPK = Entity.findPk(foreignEntity.meta())
 
-        const columns = [foreignEntityPK, entityPK].map(c => `${c} ${this.getType(Type.INTEGER)} NOT NULL`).join(',')
+        const entityField = entity.name.toLowerCase() + entityPK
+        const foreignField = foreignEntity.name.toLowerCase() + foreignPK
         
-        await this.query(`DROP TABLE IF EXISTS ${tableName}`)
-        await this.query(`CREATE TABLE IF NOT EXISTS ${tableName} (${columns})`)
+        await this.query(`DROP TABLE IF EXISTS ${tableName} CASCADE`)
 
-        await this.query(`ALTER TABLE ${tableName} ADD FOREIGN KEY (${foreignEntityPK}) REFERENCES ${foreignEntity.name}(${foreignEntityPK})`)
-        await this.query(`ALTER TABLE ${tableName} ADD FOREIGN KEY (${entityPK}) REFERENCES ${entity.name}(${entityPK})`)
+        await this.query(`
+            CREATE TABLE ${tableName} (
+                ${entityField} INT REFERENCES ${entity.name}(${entityPK}),
+                ${foreignField} INT REFERENCES ${foreignEntity.name}(${foreignPK}),
+                CONSTRAINT ID PRIMARY KEY (${entityField}, ${foreignField})
+            )
+        `)
 
-        OrmLog.print(`Table ${tableName} has been created !`);
+        OrmLog.print(`Jointure table ${tableName} has been created !`);
     }
 }
