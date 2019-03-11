@@ -3,7 +3,8 @@ import Entity from "./entity"
 
 export default class Student extends Entity {
     constructor(dbInstance) {
-        super(dbInstance, 'Student')
+        super(dbInstance)
+        this.name = Student.meta().name
     }
 
     getPK() {
@@ -26,7 +27,8 @@ export default class Student extends Entity {
                     type: Type.STRING
                 },
                 age: {
-                    type: Type.INTEGER
+                    type: Type.INTEGER,
+                    optional: true
                 }
             }
         }

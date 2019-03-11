@@ -1,5 +1,8 @@
+import mDump from "../libs/mDump";
+
 export default class Core {
-    constructor({ host, port, username, password, database, synchronize = false, entities = [] }) {
+    constructor({ type, host, port, username, password, database, synchronize = false }, entities) {
+        this.type = type
         this.host = host
         this.port = port
         this.user = username
@@ -16,9 +19,13 @@ export default class Core {
     getType(source) {
         throw "You must implement method getType !"
     }
-    
+
     getFields(attributes = []) {
         return (attributes.length == 0) ? '*' : attributes.join(', ')
+    }
+
+    async query(query, params) {
+        throw "You must implement method query !"
     }
 
     async save(entity, data) {
@@ -41,5 +48,10 @@ export default class Core {
     }
     async remove(entity, data) {
         throw "You must implement method remove !"
+    }
+
+    dump() {
+        const { type, host, port, user, password, database } = this;
+        mDump(`${type}://${user}:${password}@${host}:${port}/${database}`);
     }
 }

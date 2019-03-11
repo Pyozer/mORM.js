@@ -7,10 +7,13 @@ async function init() {
     await orm.createConnection({
         uri: 'postgresql://podpak:@localhost:5432/podpak',
         synchronize: true,
+    }, {
         entities: [
             Student
         ],
     })
+
+    orm.dbInstance.dump()
 
     const studentEntity = orm.getEntity('Student')
 

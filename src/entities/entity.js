@@ -13,24 +13,24 @@ export default class Entity {
     }
 
     async save(data) {
-        return (await this.dbInstance.save(this, data)).rows[0]
+        return this.dbInstance.save(this, data)
     }
     async count() {
-        return (await this.dbInstance.count(this)).rows[0].count
+        return this.dbInstance.count(this)
     }
     async findByPk(id, { attributes = [] }) {
-        return (await this.dbInstance.findByPk(this, id, attributes)).rows[0]
+        return this.dbInstance.findByPk(this, id, attributes)
     }
     async findAll({ attributes = [] }) {
-        return (await this.dbInstance.findAll(this, attributes)).rows
+        return await this.dbInstance.findAll(this, attributes)
     }
-    async findOne({ where = {}, attributes = [] }) {  
-        return (await this.dbInstance.findOne(this, where, attributes)).rows[0]
+    async findOne({ where = {}, attributes = [] }) {
+        return this.dbInstance.findOne(this, where, attributes)
     }
     async update(data) {
-        return (await this.dbInstance.update(this, data)).rows[0]
+        return this.dbInstance.update(this, data)
     }
     async remove(data) {
-        return (await this.dbInstance.remove(this, data)).rows[0]
+        return this.dbInstance.remove(this, data)
     }
 }
