@@ -17,7 +17,6 @@ async function init() {
         ],
     })
 
-
     orm.dbInstance.dump()
 
     const studentEntity = orm.getEntity('Student')

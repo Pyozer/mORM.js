@@ -96,21 +96,30 @@ export default class PostgreSQL extends Core {
         return res.rows[0].count
     }
 
-    async findByPk(entity, id, { attributes = [] }) {
+    async findByPk(entity, id, { attributes = [] } = {}) {
         return await this.findOne(entity, { [entity.getPK()]: id }, attributes)
     }
 
-    async findAll(entity, { attributes = [] }) {
-        const res = await this.query(`SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()}`)
-        return res.rows
-    }
-
-    async findOne(entity, where = {}, attributes = []) {
+    async findAll(entity, { where = {}, attributes = [] } = {}) {
         let conditions = Object.keys(where).map((key, i) => `${key} = $${i + 1}`).join(' AND ')
         let values = Object.values(where)
 
+        if (values.length > 0)
+            conditions = ` WHERE ${conditions}`
+
+        const res = await this.query(`SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()}${conditions}`)
+        return res.rows
+    }
+
+    async findOne(entity, { where = {}, attributes = [] } = {}) {
+        let conditions = Object.keys(where).map((key, i) => `${key} = $${i + 1}`).join(' AND ')
+        let values = Object.values(where)
+
+        if (values.length > 0)
+            conditions = ` WHERE ${conditions}`
+
         const res = await this.query(
-            `SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()} WHERE ${conditions} LIMIT 1`,
+            `SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()}${conditions} LIMIT 1`,
             values
         )
         return res.rows[0]
@@ -155,7 +164,7 @@ export default class PostgreSQL extends Core {
 
         const entityField = entity.name.toLowerCase() + entityPK
         const foreignField = foreignEntity.name.toLowerCase() + foreignPK
-        
+
         await this.query(`DROP TABLE IF EXISTS ${tableName} CASCADE`)
 
         await this.query(`

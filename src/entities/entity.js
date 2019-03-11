@@ -25,14 +25,14 @@ export default class Entity {
     async count() {
         return this.dbInstance.count(this)
     }
-    async findByPk(id, { attributes = [] }) {
-        return this.dbInstance.findByPk(this, id, attributes)
+    async findByPk(id, { attributes = [] } = {}) {
+        return this.dbInstance.findByPk(this, id, { attributes })
     }
-    async findAll({ attributes = [] }) {
-        return await this.dbInstance.findAll(this, attributes)
+    async findAll({ where = {}, attributes = [] } = {}) {
+        return await this.dbInstance.findAll(this, { where, attributes })
     }
-    async findOne({ where = {}, attributes = [] }) {
-        return this.dbInstance.findOne(this, where, attributes)
+    async findOne({ where = {}, attributes = [] } = {}) {
+        return this.dbInstance.findOne(this, { where, attributes })
     }
     async update(data) {
         return this.dbInstance.update(this, data)

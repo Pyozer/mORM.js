@@ -41,10 +41,10 @@ export default class Core {
     async findByPk(entity, id, { attributes }) {
         throw "You must implement method findByPk !"
     }
-    async findAll(entity, { attributes }) {
+    async findAll(entity, { where, attributes }) {
         throw "You must implement method findAll !"
     }
-    async findOne(entity, where, attributes) {
+    async findOne(entity, { where, attributes }) {
         throw "You must implement method findOne !"
     }
     async update(entity, data) {
@@ -53,9 +53,13 @@ export default class Core {
     async remove(entity, data) {
         throw "You must implement method remove !"
     }
-    
-    async hasOne(entity, foreignEntity, { fieldName }) {
+
+    async hasOne(entity, foreignEntity) {
         throw "You must implement method hasOne !"
+    }
+
+    async manyToMany(entity, foreignEntity) {
+        throw "You must implement method manyToMany !"
     }
 
     dump() {
