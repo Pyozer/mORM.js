@@ -156,6 +156,18 @@ export default class PostgreSQL extends Core {
         OrmLog.print(`Table ${entity.name} has been altered to add ForeignKey`);
     }
 
+    async hasMany(entity, foreignEntity) {
+        const tableName = foreignEntity.name
+        const entityPK = entity.getPK()
+        const foreignField = entity.name.toLowerCase() + entityPK
+
+        await this.query(`
+            ALTER TABLE ${tableName} ADD COLUMN ${foreignField} INT REFERENCES ${entity.name}(${entityPK})
+        `)
+
+        OrmLog.print(`Table ${tableName} has been altered to add ForeignKey`);
+    }
+
     async manyToMany(entity, foreignEntity) {
         const tableName = `${entity.name}_${foreignEntity.name}`
 

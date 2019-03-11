@@ -58,6 +58,10 @@ export default class Core {
         throw "You must implement method hasOne !"
     }
 
+    async hasMany(entity, foreignEntity) {
+        throw "You must implement method hasMany !"
+    }
+
     async manyToMany(entity, foreignEntity) {
         throw "You must implement method manyToMany !"
     }

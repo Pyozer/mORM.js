@@ -41,11 +41,15 @@ export default class Entity {
         return this.dbInstance.remove(this, data)
     }
 
-    async hasOne(entity, options) {
-        return this.dbInstance.hasOne(this, entity, options)
+    async hasOne(entity) {
+        return this.dbInstance.hasOne(this, entity)
     }
 
-    async manyToMany(entity, options) {
-        return this.dbInstance.manyToMany(this, entity, options)
+    async hasMany(entity) {
+        return this.dbInstance.hasMany(this, entity)
+    }
+
+    async manyToMany(entity) {
+        return this.dbInstance.manyToMany(this, entity)
     }
 }

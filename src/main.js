@@ -23,6 +23,7 @@ async function init() {
     const projectEntity = orm.getEntity('Project')
     await projectEntity.hasOne(Student)
     await projectEntity.manyToMany(Note)
+    await studentEntity.hasMany(Note)
 
     // Count number of rows
     const countResult = await studentEntity.count();
