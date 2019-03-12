@@ -104,7 +104,9 @@ async function init() {
     console.log(`Inserted value: ${noteSaved2.note}`)
 
     // Left join student note
-    const leftJoinStudentNote = await studentEntity.getNotes()
+    const leftJoinStudentNote = await studentEntity.getNotes({
+        where: { studentid: 1 }
+    })
     console.log(`Find All: ${leftJoinStudentNote.map(({ firstname, note }) => firstname + ": " + note).join(', ')}`);
 }
 
