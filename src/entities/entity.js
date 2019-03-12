@@ -41,6 +41,10 @@ export default class Entity {
         return this.dbInstance.remove(this, data)
     }
 
+    async findAllJoin(otherEntity, { where = {}, attributes = [] } = {}) {
+        return this.dbInstance.findAllJoin(this, otherEntity, { where, attributes })
+    }
+
     async hasOne(entity) {
         return this.dbInstance.hasOne(this, entity)
     }

@@ -21,6 +21,7 @@ async function init() {
 
     const studentEntity = orm.getEntity('Student')
     const projectEntity = orm.getEntity('Project')
+    const noteEntity = orm.getEntity('Note')
     await projectEntity.hasOne(Student)
     await projectEntity.manyToMany(Note)
     await studentEntity.hasMany(Note)
@@ -75,6 +76,29 @@ async function init() {
     // Delete student
     const studentRemoved = await studentEntity.remove(findUpdatedStudent)
     console.log(`Removed value: ${studentRemoved.id}`)
+
+    // Insert a new Project
+    const projectSaved = await projectEntity.save({
+        name: 'Best project',
+        description: 'Description of the best project',
+        studentid: 1
+    })
+    console.log(`Inserted value: ${projectSaved.name}`)
+
+    // Left join student project
+    const leftJoinProjectStudent = await projectEntity.findAllJoin(Student)
+    console.log(`Find All: ${leftJoinProjectStudent.map(e => e.firstname + ": " + e.name).join(', ')}`);
+
+    // Insert a new Note for User #1
+    const noteSaved = await noteEntity.save({
+        note: 17,
+        studentid: 1
+    })
+    console.log(`Inserted value: ${noteSaved.note}`)
+
+    // Left join student note
+    const leftJoinStudentNote = await noteEntity.findAllJoin(Student)
+    console.log(`Find All: ${leftJoinStudentNote.map(e => e.firstname + ": " + e.note).join(', ')}`);
 }
 
 init()

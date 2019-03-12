@@ -48,7 +48,7 @@ export default class PostgreSQL extends Core {
                     fields.push(`${key} ${type}${primaryKey} ${optional}`)
                 }
 
-                await this.query(`CREATE TABLE IF NOT EXISTS ${name.toLowerCase()} ( ${fields.join(',')} )`)
+                await this.query(`CREATE TABLE IF NOT EXISTS ${name} ( ${fields.join(',')} )`)
                 OrmLog.print(`Table ${name} has been created`);
             }
         } catch (e) {
@@ -92,7 +92,7 @@ export default class PostgreSQL extends Core {
     }
 
     async count(entity) {
-        const res = await this.query(`SELECT COUNT(*) FROM ${entity.name.toLowerCase()}`)
+        const res = await this.query(`SELECT COUNT(*) FROM ${entity.name}`)
         return res.rows[0].count
     }
 
@@ -107,7 +107,7 @@ export default class PostgreSQL extends Core {
         if (values.length > 0)
             conditions = ` WHERE ${conditions}`
 
-        const res = await this.query(`SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()}${conditions}`)
+        const res = await this.query(`SELECT ${this.getFields(attributes)} FROM ${entity.name}${conditions}`)
         return res.rows
     }
 
@@ -119,7 +119,7 @@ export default class PostgreSQL extends Core {
             conditions = ` WHERE ${conditions}`
 
         const res = await this.query(
-            `SELECT ${this.getFields(attributes)} FROM ${entity.name.toLowerCase()}${conditions} LIMIT 1`,
+            `SELECT ${this.getFields(attributes)} FROM ${entity.name}${conditions} LIMIT 1`,
             values
         )
         return res.rows[0]
@@ -143,6 +143,22 @@ export default class PostgreSQL extends Core {
             [data[entity.getPK()]]
         )
         return res.rows[0]
+    }
+
+    async findAllJoin(entity, otherEntity, { where = {}, attributes = [] } = {}) {
+        let conditions = Object.keys(where).map((key, i) => `${key} = $${i + 1}`).join(' AND ')
+        let values = Object.values(where)
+
+        if (values.length > 0)
+            conditions = ` WHERE ${conditions}`
+
+        const foreignPK = Entity.findPk(otherEntity.meta())
+        const foreignPKField = otherEntity.name.toLowerCase() + foreignPK
+        
+        const res = await this.query(
+            `SELECT ${this.getFields(attributes)} FROM ${entity.name} LEFT JOIN ${otherEntity.name} ON ${entity.name}.${foreignPKField} = ${otherEntity.name}.${foreignPK}${conditions}`
+        )
+        return res.rows
     }
 
     async hasOne(entity, foreignEntity) {
