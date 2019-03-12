@@ -41,15 +41,17 @@ export default class Entity {
         return this.dbInstance.remove(this, data)
     }
 
-    async findAllJoin(otherEntity, { where = {}, attributes = [] } = {}) {
-        return this.dbInstance.findAllJoin(this, otherEntity, { where, attributes })
-    }
-
     async hasOne(entity) {
+        Entity.prototype[`get${entity.name}`] = ({ where = {}, attributes = [] } = {}) => {
+            return this.dbInstance.findOneJoin(this, entity, { where, attributes })
+        }
         return this.dbInstance.hasOne(this, entity)
     }
 
     async hasMany(entity) {
+        Entity.prototype[`get${entity.name}s`] = ({ where = {}, attributes = [] } = {}) => {
+            return this.dbInstance.findAllJoin(this, entity, { where, attributes })
+        }
         return this.dbInstance.hasMany(this, entity)
     }
 

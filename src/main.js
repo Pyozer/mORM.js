@@ -10,12 +10,12 @@ async function init() {
         uri: 'postgresql://podpak:@localhost:5432/podpak',
         synchronize: true,
     }, {
-        entities: [
-            Student,
-            Project,
-            Note
-        ],
-    })
+            entities: [
+                Student,
+                Project,
+                Note
+            ],
+        })
 
     orm.dbInstance.dump()
 
@@ -86,8 +86,10 @@ async function init() {
     console.log(`Inserted value: ${projectSaved.name}`)
 
     // Left join student project
-    const leftJoinProjectStudent = await projectEntity.findAllJoin(Student)
-    console.log(`Find All: ${leftJoinProjectStudent.map(e => e.firstname + ": " + e.name).join(', ')}`);
+    const { firstname: lfFirstName, name: lfProject } = await projectEntity.getStudent({
+        where: { studentid: 1 }
+    })
+    console.log(`Find project's student: ${lfFirstName + ": " + lfProject}`);
 
     // Insert a new Note for User #1
     const noteSaved = await noteEntity.save({
@@ -95,10 +97,15 @@ async function init() {
         studentid: 1
     })
     console.log(`Inserted value: ${noteSaved.note}`)
+    const noteSaved2 = await noteEntity.save({
+        note: 10,
+        studentid: 1
+    })
+    console.log(`Inserted value: ${noteSaved2.note}`)
 
     // Left join student note
-    const leftJoinStudentNote = await noteEntity.findAllJoin(Student)
-    console.log(`Find All: ${leftJoinStudentNote.map(e => e.firstname + ": " + e.note).join(', ')}`);
+    const leftJoinStudentNote = await studentEntity.getNotes()
+    console.log(`Find All: ${leftJoinStudentNote.map(({ firstname, note }) => firstname + ": " + note).join(', ')}`);
 }
 
 init()

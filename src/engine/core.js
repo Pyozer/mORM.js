@@ -28,6 +28,10 @@ export default class Core {
         return (attributes.length == 0) ? '*' : attributes.join(', ')
     }
 
+    getWhereConditions(where) {
+        throw "You must implement method getWhereConditions !"
+    }
+
     async query(query, params) {
         throw "You must implement method query !"
     }
@@ -52,6 +56,14 @@ export default class Core {
     }
     async remove(entity, data) {
         throw "You must implement method remove !"
+    }
+
+    async findOneJoin(entity, otherEntity, { where = {}, attributes = [] } = {}) {
+        throw "You must implement method findOneJoin !"
+    }
+
+    async findAllJoin(entity, otherEntity, { where = {}, attributes = [] } = {}) {
+        throw "You must implement method findAllJoin !"
     }
 
     async hasOne(entity, foreignEntity) {

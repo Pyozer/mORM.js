@@ -69,6 +69,16 @@ export default class PostgreSQL extends Core {
         return undefined
     }
 
+    getWhereConditions(where) {
+        let conditions = Object.keys(where).map((key, i) => `${key} = $${i + 1}`).join(' AND ')
+        const values = Object.values(where)
+
+        if (values.length > 0)
+            conditions = ` WHERE ${conditions}`
+
+        return { conditions, values }
+    }
+
     async query(query, params) {
         const client = await this.pool.connect()
         try {
@@ -101,22 +111,14 @@ export default class PostgreSQL extends Core {
     }
 
     async findAll(entity, { where = {}, attributes = [] } = {}) {
-        let conditions = Object.keys(where).map((key, i) => `${key} = $${i + 1}`).join(' AND ')
-        let values = Object.values(where)
-
-        if (values.length > 0)
-            conditions = ` WHERE ${conditions}`
+        const { conditions, values } = this.getWhereConditions(where)
 
         const res = await this.query(`SELECT ${this.getFields(attributes)} FROM ${entity.name}${conditions}`)
         return res.rows
     }
 
     async findOne(entity, { where = {}, attributes = [] } = {}) {
-        let conditions = Object.keys(where).map((key, i) => `${key} = $${i + 1}`).join(' AND ')
-        let values = Object.values(where)
-
-        if (values.length > 0)
-            conditions = ` WHERE ${conditions}`
+        const { conditions, values } = this.getWhereConditions(where)
 
         const res = await this.query(
             `SELECT ${this.getFields(attributes)} FROM ${entity.name}${conditions} LIMIT 1`,
@@ -145,19 +147,37 @@ export default class PostgreSQL extends Core {
         return res.rows[0]
     }
 
-    async findAllJoin(entity, otherEntity, { where = {}, attributes = [] } = {}) {
-        let conditions = Object.keys(where).map((key, i) => `${key} = $${i + 1}`).join(' AND ')
-        let values = Object.values(where)
+    async findOneJoin(entity, otherEntity, { where = {}, attributes = [] } = {}) {
+        const { conditions, values } = this.getWhereConditions(where)
 
-        if (values.length > 0)
-            conditions = ` WHERE ${conditions}`
+        if (!otherEntity.meta)
+            throw 'Probleme when trying to get entity data !'
 
         const foreignPK = Entity.findPk(otherEntity.meta())
         const foreignPKField = otherEntity.name.toLowerCase() + foreignPK
-        
-        const res = await this.query(
-            `SELECT ${this.getFields(attributes)} FROM ${entity.name} LEFT JOIN ${otherEntity.name} ON ${entity.name}.${foreignPKField} = ${otherEntity.name}.${foreignPK}${conditions}`
-        )
+
+        const res = await this.query(`
+            SELECT ${this.getFields(attributes)} FROM ${otherEntity.name}
+            LEFT JOIN ${entity.name} ON ${entity.name}.${foreignPKField} = ${otherEntity.name}.${foreignPK}
+            ${conditions} LIMIT 1
+        `, values)
+        return res.rows[0]
+    }
+
+    async findAllJoin(entity, otherEntity, { where = {}, attributes = [] } = {}) {
+        const { conditions, values } = this.getWhereConditions(where)
+
+        if (!otherEntity.meta)
+            throw 'Probleme when trying to get entity data !'
+
+        const foreignPK = entity.getPK()
+        const foreignPKField = entity.name.toLowerCase() + foreignPK
+
+        const res = await this.query(`
+            SELECT ${this.getFields(attributes)} FROM ${entity.name}
+            LEFT JOIN ${otherEntity.name} ON ${otherEntity.name}.${foreignPKField} = ${entity.name}.${foreignPK}
+            ${conditions}
+        `, values)
         return res.rows
     }
 
